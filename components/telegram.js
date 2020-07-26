@@ -6,6 +6,7 @@ const config = require('../config').telegram;
 const debug = require('../config').debug;
 const {	convertWebmToMp4 } = require('./convert');
 const fs = require('fs');
+const { promises } = require('dns');
 
 const telegram = axios.create({
 	baseURL: `https://api.telegram.org/bot${config.token}`,
@@ -71,6 +72,7 @@ const sendMedia = post => {
 				`Link: reddit.com${post.perma}`;
 			return sendPhoto(post.url, post.chat, encodeURIComponent(caption));
 		}
+		return Promise.resolve();
 	} else {
 		if (debug) console.log('Posting: ', post);
 		const sm = post.type === '.webm' ? sendVideo
