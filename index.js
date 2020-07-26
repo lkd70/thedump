@@ -1,13 +1,68 @@
 'use strict';
 
 const searches = require('./config').search;
+const reddit_search = require('./config').reddit_search;
+const reddit = require('./components/reddit');
 const debug = require('./config').debug;
 const {	getCatalog, getThread } = require('./components/chan');
-const { postExists, addPost } = require('./components/db');
+const {	chanPostExists,	redditPostExists, addPost } = require('./components/db');
 const { sendMedia } = require('./components/telegram');
 
+
+const processRedditPosts = () => new Promise(async resolve => {
+	const post_queue = [];
+
+	for (let b = 0; b < reddit_search.length; b++) {
+		const search = reddit_search[b];
+
+		for (let o = 0; o < search.boards.length; o++) {
+			const board = search.boards[o];
+			const posts = await reddit.getNew(board.code);
+			for (let t = 0; t < search.terms.length; t++) {
+				const term = search.terms[t].toLowerCase();
+				const filtered_posts = posts.filter(p => p.data.title.toLowerCase().includes(term));
+				console.log(filtered_posts[0]);
+
+				for (let p = 0; p < filtered_posts.length; p++) {
+					const pst = filtered_posts[p].data;
+					const post = {
+						subreddit: pst.subreddit,
+						author_fullname: pst.author_fullname,
+						title: pst.title,
+						name: pst.name,
+						hint: pst.post_hint,
+						urldest: pst.url_overridden_by_dest,
+						subreddit_id: pst.subreddit_id,
+						id: pst.id,
+						author: pst.author,
+						perma: pst.permalink,
+						url: pst.url,
+						reddit: true,
+						chat: search.chat_id,
+					};
+					const exists = await redditPostExists(post)
+					if (!exists) post_queue.push(post);
+				}
+			}
+
+		}
+	}
+
+	for (let p = 0; p < post_queue.length; p++) {
+		const post = post_queue[p];
+
+		addPost(post).then(() => {
+			sendMedia(post).then(() => debug && console.log('posted')).catch('errored');
+		}).catch(console.error);
+
+		// eslint-disable-next-line no-await-in-loop
+		await new Promise(r => setTimeout(r, 2000));
+	}
+	resolve(true);
+});
+
 // eslint-disable-next-line no-async-promise-executor
-const processPosts = () => new Promise(async resolve => {
+const process4chanPosts = () => new Promise(async resolve => {
 	const post_queue = [];
 
 	for (let b = 0; b < searches.length; b++) {
@@ -42,7 +97,7 @@ const processPosts = () => new Promise(async resolve => {
 							type: pst.ext,
 							poster: pst.name,
 						};
-						const exists = await postExists(post_data);
+						const exists = await chanPostExists(post_data);
 						if (!exists) post_queue.push(post_data);
 					}
 				}
@@ -66,7 +121,9 @@ const processPosts = () => new Promise(async resolve => {
 });
 
 const main = async () => {
-	await processPosts();
+	//await process4chanPosts();
+	await new Promise(r => setTimeout(r, 500));
+	await processRedditPosts();
 	await new Promise(r => setTimeout(r, 20000));
 };
 

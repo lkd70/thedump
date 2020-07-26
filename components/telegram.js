@@ -12,11 +12,13 @@ const telegram = axios.create({
 	responseType: 'json'
 });
 
-const sendPhoto = (media, chat) => new Promise((resolve, reject) =>
-	telegram(`/sendPhoto?chat_id=${chat}&photo=${media}`).then(resolve).catch(err => {
+const sendPhoto = (media, chat, caption = '') => new Promise((resolve, reject) =>
+	telegram(
+		`/sendPhoto?chat_id=${chat}&photo=${media}&caption=${caption}`
+	).then(resolve).catch(err => {
 		if (err.statusCode === 429) {
 			if (debug) console.log('Posting failed due to cooldown. Trying again shortly');
-			resolve(sendPhoto(media, chat));
+			resolve(sendPhoto(media, chat, caption));
 		} else {
 			reject(err);
 		}
@@ -63,11 +65,19 @@ const sendVideo = (media, chat) => new Promise(resolve => {
 });
 
 const sendMedia = post => {
-	if (debug) console.log('Posting: ', post);
-	const sm = post.type === '.webm' ? sendVideo
-		: post.type === '.gif' ? sendAnimation : sendPhoto;
+	if (post.reddit) {
+		if (post.hint === 'image') {
+			const caption = `Title: ${post.title}\nAuthor: ${post.author}\n` +
+				`Link: reddit.com${post.perma}`;
+			return sendPhoto(post.url, post.chat, encodeURIComponent(caption));
+		}
+	} else {
+		if (debug) console.log('Posting: ', post);
+		const sm = post.type === '.webm' ? sendVideo
+			: post.type === '.gif' ? sendAnimation : sendPhoto;
 
-	return sm(`https://i.4cdn.org/${post.board}/${post.time}${post.type}`, post.chat);
+		return sm(`https://i.4cdn.org/${post.board}/${post.time}${post.type}`, post.chat);
+	}
 };
 
 module.exports = { sendMedia };
