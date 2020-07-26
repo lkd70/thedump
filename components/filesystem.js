@@ -24,19 +24,13 @@ function _randomChars(howMany) {
 	return value.join('');
 }
 
-const genFileName = () => path.join(os.tmpdir(), _randomChars(10));
+const genTempFileName = () => path.join(os.tmpdir(), _randomChars(10));
 
-const createTempFile = (data, ext) => new Promise(resolve => {
-	const file = genFileName() + ext;
-	fs.writeFileSync(file, data, err => {
-		if (err) {
-			resolve(createTempFile(data, ext));
-		} else {
-			resolve(file);
-		}
-	});
+const genTempFile = (ext = '.mp4') => new Promise(resolve => {
+	if (fs.existsSync(genTempFileName() + ext)) path.resolve(genTempFile(ext));
+	resolve(genTempFileName() + ext);
 });
 
 module.exports = {
-	createTempFile
+	genTempFile
 };

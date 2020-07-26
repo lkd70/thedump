@@ -56,6 +56,7 @@ const sendVideo = (media, chat) => new Promise(resolve => {
 			}
 		});
 	}).catch(() => {
+		console.error('convert error');
 		// Convert failed for some reason, resolve for now
 		resolve(true);
 	});
