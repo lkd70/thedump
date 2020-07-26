@@ -1,0 +1,32 @@
+{
+  "name": "thedump",
+  "version": "0.0.1",
+  "description": "Dump content to telegram channels",
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "ffmpeg-static": "^4.2.6",
+    "form-data": "^3.0.0",
+    "nedb": "^1.8.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lkd70/thedump.git"
+  },
+  "keywords": [
+    "LKD70",
+    "Telegram",
+    "4chan",
+    "TheDump"
+  ],
+  "author": "LKD70",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/lkd70/thedump/issues"
+  },
+  "homepage": "https://github.com/lkd70/thedump#readme"
+}
