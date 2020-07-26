@@ -125,6 +125,7 @@ const main = async () => {
 	await new Promise(r => setTimeout(r, 500));
 	await processRedditPosts();
 	await new Promise(r => setTimeout(r, 20000));
+	main();
 };
 
 main();
