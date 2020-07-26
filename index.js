@@ -21,7 +21,6 @@ const processRedditPosts = () => new Promise(async resolve => {
 			for (let t = 0; t < search.terms.length; t++) {
 				const term = search.terms[t].toLowerCase();
 				const filtered_posts = posts.filter(p => p.data.title.toLowerCase().includes(term));
-				console.log(filtered_posts[0]);
 
 				for (let p = 0; p < filtered_posts.length; p++) {
 					const pst = filtered_posts[p].data;
