@@ -121,7 +121,7 @@ const process4chanPosts = () => new Promise(async resolve => {
 });
 
 const main = async () => {
-	//await process4chanPosts();
+	await process4chanPosts();
 	await new Promise(r => setTimeout(r, 500));
 	await processRedditPosts();
 	await new Promise(r => setTimeout(r, 20000));
