@@ -1,6 +1,7 @@
 'use strict';
 
 const DataStore = require('nedb');
+const Logger = require('./logger');
 
 const db = new DataStore({ filename: './store/posts.db', autoload: true });
 
@@ -9,7 +10,7 @@ const chanPostExists = post => new Promise((resolve, reject) => db.findOne({
 	md5: post.md5,
 }, (err, doc) => {
 	if (err) {
-		if (debug) console.error(err);
+		Logger.error(err);
 		reject(err);
 	} else {
 		resolve(doc !== null);
@@ -22,7 +23,7 @@ const redditPostExists = post => new Promise((resolve, reject) => db.findOne({
 	id: post.id,
 }, (err, doc) => {
 	if (err) {
-		if (debug) console.error(err);
+		Logger.error(err);
 		reject(err);
 	} else {
 		resolve(doc !== null);
@@ -31,7 +32,10 @@ const redditPostExists = post => new Promise((resolve, reject) => db.findOne({
 
 const addPost = (post) => new Promise((resolve, reject) => {
 	db.insert(post, (err, doc) => {
-		if (err) reject(err);
+		if (err) {
+			Logger.info(err);
+			reject(err);
+		}
 		resolve(doc);
 	});
 });

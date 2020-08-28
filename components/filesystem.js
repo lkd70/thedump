@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const crypto = require('crypto');
+const Logger = require('./logger');
 
 const RANDOM_CHARS = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -27,8 +28,10 @@ function _randomChars(howMany) {
 const genTempFileName = () => path.join(os.tmpdir(), _randomChars(10));
 
 const genTempFile = (ext = '.mp4') => new Promise(resolve => {
-	if (fs.existsSync(genTempFileName() + ext)) path.resolve(genTempFile(ext));
-	resolve(genTempFileName() + ext);
+	const file_name = genTempFileName();
+	if (fs.existsSync(file_name + ext)) path.resolve(genTempFile(ext));
+	Logger.info(`genTempFile() generated: ${file_name}`);
+	resolve(file_name + ext);
 });
 
 module.exports = {

@@ -5,9 +5,11 @@
   "main": "index.js",
   "dependencies": {
     "axios": "^0.19.2",
+    "dotenv": "^8.2.0",
     "ffmpeg-static": "^4.2.6",
     "form-data": "^3.0.0",
-    "nedb": "^1.8.0"
+    "nedb": "^1.8.0",
+    "winston": "^3.3.3"
   },
   "devDependencies": {},
   "scripts": {

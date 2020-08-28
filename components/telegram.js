@@ -3,10 +3,9 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const config = require('../config').telegram;
-const debug = require('../config').debug;
 const {	convertWebmToMp4 } = require('./convert');
 const fs = require('fs');
-const { promises } = require('dns');
+const Logger = require('./logger');
 
 const telegram = axios.create({
 	baseURL: `https://api.telegram.org/bot${config.token}`,
@@ -18,9 +17,9 @@ const sendPhoto = (media, chat, caption = '') => new Promise((resolve, reject) =
 		`/sendPhoto?chat_id=${chat}&photo=${media}&caption=${caption}`
 	).then(resolve).catch(err => {
 		if (err.statusCode === 429) {
-			if (debug) console.log('Posting failed due to cooldown. Trying again shortly');
 			resolve(sendPhoto(media, chat, caption));
 		} else {
+			Logger.error(err);
 			reject(err);
 		}
 	}));
@@ -28,9 +27,9 @@ const sendPhoto = (media, chat, caption = '') => new Promise((resolve, reject) =
 const sendAnimation = (media, chat) => new Promise((resolve, reject) =>
 	telegram(`/sendAnimation?chat_id=${chat}&animation=${media}`).then(resolve).catch(err => {
 		if (err.statusCode === 429) {
-			if (debug) console.log('Posting failed due to cooldown. Trying again shortly');
 			resolve(sendAnimation(media, chat));
 		} else {
+			Logger.error(err);
 			reject(err);
 		}
 	}));
@@ -43,29 +42,28 @@ const sendVideo = (media, chat) => new Promise(resolve => {
 			headers: form.getHeaders()
 		}).then(() => fs.unlink(path, err => {
 			if (err) {
-				if (debug) console.log('Error in deleting: ', err);
+				Logger.error(err);
 				resolve(true);
 			} else {
 				// posted vid - deleted local
 				resolve(true);
 			}
 		})).catch(err => {
+			Logger.error(err);
 			if (err.statusCode === 429) {
-				if (debug) console.log('Posting failed due to cooldown. Trying again shortly');
 				resolve(sendVideo(media));
 			} else {
-				if (debug) console.log('Unknown error (1): ', err);
 				resolve(true);
 			}
 		});
 	}).catch(() => {
-		console.error('convert error');
-		// Convert failed for some reason, resolve for now
+		Logger.error('Conversion error');
 		resolve(true);
 	});
 });
 
 const sendMedia = post => {
+	Logger.info('Posting:', post);
 	if (post.reddit) {
 		if (post.hint === 'image') {
 			const caption = `Title: ${post.title}\nAuthor: ${post.author}\n` +
@@ -74,7 +72,6 @@ const sendMedia = post => {
 		}
 		return Promise.resolve();
 	} else {
-		if (debug) console.log('Posting: ', post);
 		const sm = post.type === '.webm' ? sendVideo
 			: post.type === '.gif' ? sendAnimation : sendPhoto;
 

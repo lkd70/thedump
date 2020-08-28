@@ -1,7 +1,5 @@
 'use strict';
 
-const debug = true;
-
 const boards_config = {
 	b: {
 		name: 'Random',
@@ -56,6 +54,5 @@ const telegram = {
 module.exports = {
 	search,
 	telegram,
-	debug,
 	reddit_search,
 };

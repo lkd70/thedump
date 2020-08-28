@@ -1,9 +1,10 @@
 'use strict';
 
+require('dotenv').config();
+const Logger = require('./components/logger');
 const searches = require('./config').search;
 const reddit_search = require('./config').reddit_search;
 const reddit = require('./components/reddit');
-const debug = require('./config').debug;
 const {	getCatalog, getThread } = require('./components/chan');
 const {	chanPostExists,	redditPostExists, addPost } = require('./components/db');
 const { sendMedia } = require('./components/telegram');
@@ -51,8 +52,8 @@ const processRedditPosts = () => new Promise(async resolve => {
 		const post = post_queue[p];
 
 		addPost(post).then(() => {
-			sendMedia(post).then(() => debug && console.log('posted')).catch('errored');
-		}).catch(console.error);
+			sendMedia(post).catch(Logger.error);
+		}).catch(Logger.error);
 
 		// eslint-disable-next-line no-await-in-loop
 		await new Promise(r => setTimeout(r, 2000));
@@ -104,14 +105,14 @@ const process4chanPosts = () => new Promise(async resolve => {
 		}
 	}
 
-	if (debug) console.log('processing queue');
+	Logger.info('Processing queue');
 
 	for (let p = 0; p < post_queue.length; p++) {
 		const post = post_queue[p];
 
 		addPost(post).then(() => {
-			sendMedia(post).then(() => debug && console.log('posted')).catch('errored');
-		}).catch(console.error);
+			sendMedia(post).catch(Logger.error);
+		}).catch(Logger.error);
 
 		// eslint-disable-next-line no-await-in-loop
 		await new Promise(r => setTimeout(r, 2000));
@@ -127,4 +128,5 @@ const main = async () => {
 	main();
 };
 
+Logger.info('Starting');
 main();
