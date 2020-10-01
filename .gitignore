@@ -1,6 +1,6 @@
 # Custom
 config.js
-store/
+store/*
 
 # Logs
 logs
